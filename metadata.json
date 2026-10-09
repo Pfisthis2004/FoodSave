@@ -1,0 +1,6 @@
+{
+  "name": "FoodSave",
+  "description": "Quản lý thực phẩm thông minh, theo dõi hạn sử dụng và gợi ý món ăn AI tránh lãng phí.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

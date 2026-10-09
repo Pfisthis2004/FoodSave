@@ -15,8 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,8 +28,6 @@ import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -106,6 +108,7 @@ fun FoodsScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
             ) {
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Thực phẩm của tôi",
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -250,7 +253,7 @@ fun FoodsScreen(
                 )
             }
 
-            // Food Items List or Empty State
+            // Food Items Responsive Adaptive Grid or Empty State
             if (foods.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -279,9 +282,12 @@ fun FoodsScreen(
                     }
                 }
             } else {
-                LazyColumn(
+                // Adaptive Grid: 1 column on phone, 2 or 3 columns on tablet/landscape
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 340.dp),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 88.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(foods, key = { it.id }) { food ->

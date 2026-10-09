@@ -76,4 +76,33 @@ class ExampleUnitTest {
         assertTrue(recipe.isOfflineRecipe)
         assertEquals(2, recipe.steps.size)
     }
+
+    @Test
+    fun geminiRecipeService_emptyIngredients_returnsSpecificMessage() = kotlinx.coroutines.runBlocking {
+        val service = com.example.data.remote.GeminiRecipeService()
+        val result = service.generateRecipes(emptyList())
+        assertTrue(result.isFailure)
+        assertEquals("hiện tại không có thực phẩm nào để tôi có thể gợi ý", result.exceptionOrNull()?.message)
+    }
+
+    @Test
+    fun geminiRecipeService_withIngredients_generatesRecipesWithImages() = kotlinx.coroutines.runBlocking {
+        val service = com.example.data.remote.GeminiRecipeService()
+        val foods = listOf(
+            FoodItem(
+                name = "Thịt gà",
+                category = "Thịt",
+                quantity = 500.0,
+                unit = "g",
+                purchaseDate = System.currentTimeMillis(),
+                expiryDate = System.currentTimeMillis() + 86400000L
+            )
+        )
+        val result = service.generateRecipes(foods)
+        assertTrue(result.isSuccess)
+        val recipes = result.getOrThrow()
+        assertTrue(recipes.isNotEmpty())
+        assertTrue(recipes.all { it.imageRes != null })
+        assertTrue(recipes.any { it.name.contains("gà", ignoreCase = true) })
+    }
 }

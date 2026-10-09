@@ -43,7 +43,7 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         val db = FoodDatabase.getDatabase(application)
         repository = FoodRepository(db.foodDao(), db.savedRecipeDao(), db.offlineRecipeDao())
         viewModelScope.launch {
-            repository.ensureSampleDataLoaded()
+            repository.ensureSampleDataLoaded(application)
             NotificationHelper.scheduleOfflineDailyReminder(application)
         }
     }
@@ -200,23 +200,24 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
 
     fun generateRecipes() {
         viewModelScope.launch {
-            _recipeUiState.value = RecipeUiState.Loading
             val currentFoods = activeFoods.value
             if (currentFoods.isEmpty()) {
-                _recipeUiState.value = RecipeUiState.Error("Chưa có thực phẩm nào trong tủ lạnh để gợi ý món ăn.")
+                _recipeUiState.value = RecipeUiState.Error("hiện tại không có thực phẩm nào để tôi có thể gợi ý")
                 return@launch
             }
+            _recipeUiState.value = RecipeUiState.Loading
 
-            // Read Room offline recipes
-            val offlineList = repository.offlineRecipes.firstOrNull() ?: emptyList()
-            val result = recipeService.generateRecipes(currentFoods, offlineList)
+            // Read Room saved recipes and offline recipes
+            val savedList = repository.getSavedRecipesList()
+            val offlineList = repository.getOfflineRecipesList()
+            val result = recipeService.generateRecipes(currentFoods, savedList, offlineList)
             result.fold(
                 onSuccess = { recipes ->
                     _recipeUiState.value = RecipeUiState.Success(recipes, isOfflineSource = true)
                 },
                 onFailure = { error ->
                     _recipeUiState.value = RecipeUiState.Error(
-                        error.message ?: "Không thể tạo gợi ý lúc này. Vui lòng thử lại."
+                        error.message ?: "hiện tại không có thực phẩm nào để tôi có thể gợi ý"
                     )
                 }
             )
@@ -264,7 +265,7 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
 
     fun reloadSampleFoods() {
         viewModelScope.launch {
-            repository.clearAllData()
+            repository.reloadSampleFoods()
         }
     }
 }

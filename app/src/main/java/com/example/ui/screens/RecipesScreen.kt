@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -83,6 +84,7 @@ fun RecipesScreen(
     onGenerateRecipes: () -> Unit,
     onRecipeClick: (Recipe) -> Unit,
     onToggleSaveRecipe: (Recipe) -> Unit,
+    onAddFoodClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Gợi ý thông minh, 1: Sổ tay ngoại tuyến, 2: Đã lưu
@@ -94,14 +96,20 @@ fun RecipesScreen(
 
     val activeFoodNames = remember(activeFoods) { activeFoods.map { it.name } }
 
-    LazyColumn(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // 1. Header & Offline Assurance Badge
+        val isWide = maxWidth >= 720.dp
+        val chunkSize = if (isWide) 2 else 1
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = if (isWide) 24.dp else 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 1. Header & Offline Assurance Badge
         item {
             Column {
                 Text(
@@ -217,11 +225,36 @@ fun RecipesScreen(
                             Spacer(modifier = Modifier.height(10.dp))
 
                             if (activeFoods.isEmpty()) {
-                                Text(
-                                    text = "Tủ lạnh đang trống. Hãy thêm thực phẩm trước để gợi ý chính xác.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(text = "🧺", fontSize = 42.sp)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "hiện tại không có thực phẩm nào để tôi có thể gợi ý",
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "Vui lòng thêm thực phẩm vào kho hoặc tủ lạnh trước để nhận gợi ý món ăn phù hợp.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Button(
+                                        onClick = onAddFoodClick,
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                    ) {
+                                        Text("+ Thêm thực phẩm ngay")
+                                    }
+                                }
                             } else {
                                 FlowRow(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -286,7 +319,13 @@ fun RecipesScreen(
                 // CTA Button: "Gợi ý món ăn"
                 item {
                     Button(
-                        onClick = onGenerateRecipes,
+                        onClick = {
+                            if (activeFoods.isEmpty()) {
+                                onAddFoodClick()
+                            } else {
+                                onGenerateRecipes()
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -304,7 +343,11 @@ fun RecipesScreen(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = if (uiState is RecipeUiState.Success) "Tạo lại gợi ý món ăn" else "Gợi ý món ăn từ tủ lạnh",
+                            text = when {
+                                activeFoods.isEmpty() -> "Thêm thực phẩm để nhận gợi ý"
+                                uiState is RecipeUiState.Success -> "Tạo lại gợi ý món ăn"
+                                else -> "Gợi ý món ăn từ tủ lạnh"
+                            },
                             style = MaterialTheme.typography.labelLarge.copy(
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 16.sp
@@ -323,16 +366,17 @@ fun RecipesScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(text = "🥗", fontSize = 48.sp)
+                                    Text(text = if (activeFoods.isEmpty()) "🧺" else "🥗", fontSize = 48.sp)
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Text(
-                                        text = "Sẵn sàng gợi ý món ăn!",
+                                        text = if (activeFoods.isEmpty()) "hiện tại không có thực phẩm nào để tôi có thể gợi ý" else "Sẵn sàng gợi ý món ăn!",
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Bấm 'Gợi ý món ăn' để tìm 3 công thức phù hợp nhất (hoạt động tốt cả khi ngoại tuyến).",
+                                        text = if (activeFoods.isEmpty()) "Hãy bấm 'Thêm thực phẩm ngay' để bắt đầu quản lý thực phẩm của bạn." else "Bấm 'Gợi ý món ăn từ tủ lạnh' để tìm 3 công thức phù hợp nhất (kèm ảnh món ăn thực tế).",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -392,16 +436,30 @@ fun RecipesScreen(
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
-                                    Button(
-                                        onClick = onGenerateRecipes,
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary,
-                                            contentColor = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    ) {
-                                        Icon(imageVector = Icons.Outlined.Refresh, contentDescription = null)
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Thử lại")
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        if (activeFoods.isEmpty()) {
+                                            Button(
+                                                onClick = onAddFoodClick,
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            ) {
+                                                Text("+ Thêm thực phẩm ngay")
+                                            }
+                                        } else {
+                                            Button(
+                                                onClick = onGenerateRecipes,
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            ) {
+                                                Icon(imageVector = Icons.Outlined.Refresh, contentDescription = null)
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text("Thử lại")
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -435,14 +493,37 @@ fun RecipesScreen(
                             }
                         }
 
-                        items(uiState.recipes) { recipe ->
-                            val isSaved = savedRecipes.any { it.name == recipe.name }
-                            RecipeResultCard(
-                                recipe = recipe,
-                                isSaved = isSaved,
-                                onToggleSave = { onToggleSaveRecipe(recipe) },
-                                onClick = { onRecipeClick(recipe) }
-                            )
+                        items(uiState.recipes.chunked(chunkSize)) { pair ->
+                            if (chunkSize > 1) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                ) {
+                                    pair.forEach { recipe ->
+                                        Box(modifier = Modifier.weight(1f)) {
+                                            val isSaved = savedRecipes.any { it.name == recipe.name }
+                                            RecipeResultCard(
+                                                recipe = recipe,
+                                                isSaved = isSaved,
+                                                onToggleSave = { onToggleSaveRecipe(recipe) },
+                                                onClick = { onRecipeClick(recipe) }
+                                            )
+                                        }
+                                    }
+                                    if (pair.size == 1) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            } else {
+                                val recipe = pair.first()
+                                val isSaved = savedRecipes.any { it.name == recipe.name }
+                                RecipeResultCard(
+                                    recipe = recipe,
+                                    isSaved = isSaved,
+                                    onToggleSave = { onToggleSaveRecipe(recipe) },
+                                    onClick = { onRecipeClick(recipe) }
+                                )
+                            }
                         }
                     }
                 }
@@ -511,15 +592,39 @@ fun RecipesScreen(
                         }
                     }
                 } else {
-                    items(offlineRecipes) { offlineItem ->
-                        val recipe = offlineItem.toRecipe(activeFoodNames)
-                        val isSaved = savedRecipes.any { it.name == recipe.name }
-                        RecipeResultCard(
-                            recipe = recipe,
-                            isSaved = isSaved,
-                            onToggleSave = { onToggleSaveRecipe(recipe) },
-                            onClick = { onRecipeClick(recipe) }
-                        )
+                    items(offlineRecipes.chunked(chunkSize)) { pair ->
+                        if (chunkSize > 1) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                            ) {
+                                pair.forEach { offlineItem ->
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        val recipe = offlineItem.toRecipe(activeFoodNames)
+                                        val isSaved = savedRecipes.any { it.name == recipe.name }
+                                        RecipeResultCard(
+                                            recipe = recipe,
+                                            isSaved = isSaved,
+                                            onToggleSave = { onToggleSaveRecipe(recipe) },
+                                            onClick = { onRecipeClick(recipe) }
+                                        )
+                                    }
+                                }
+                                if (pair.size == 1) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        } else {
+                            val offlineItem = pair.first()
+                            val recipe = offlineItem.toRecipe(activeFoodNames)
+                            val isSaved = savedRecipes.any { it.name == recipe.name }
+                            RecipeResultCard(
+                                recipe = recipe,
+                                isSaved = isSaved,
+                                onToggleSave = { onToggleSaveRecipe(recipe) },
+                                onClick = { onRecipeClick(recipe) }
+                            )
+                        }
                     }
                 }
             }
@@ -553,14 +658,37 @@ fun RecipesScreen(
                         }
                     }
                 } else {
-                    items(savedRecipes) { saved ->
-                        val recipe = saved.toRecipe()
-                        RecipeResultCard(
-                            recipe = recipe,
-                            isSaved = true,
-                            onToggleSave = { onToggleSaveRecipe(recipe) },
-                            onClick = { onRecipeClick(recipe) }
-                        )
+                    items(savedRecipes.chunked(chunkSize)) { pair ->
+                        if (chunkSize > 1) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                            ) {
+                                pair.forEach { saved ->
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        val recipe = saved.toRecipe()
+                                        RecipeResultCard(
+                                            recipe = recipe,
+                                            isSaved = true,
+                                            onToggleSave = { onToggleSaveRecipe(recipe) },
+                                            onClick = { onRecipeClick(recipe) }
+                                        )
+                                    }
+                                }
+                                if (pair.size == 1) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        } else {
+                            val saved = pair.first()
+                            val recipe = saved.toRecipe()
+                            RecipeResultCard(
+                                recipe = recipe,
+                                isSaved = true,
+                                onToggleSave = { onToggleSaveRecipe(recipe) },
+                                onClick = { onRecipeClick(recipe) }
+                            )
+                        }
                     }
                 }
             }
@@ -570,6 +698,7 @@ fun RecipesScreen(
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
+}
 }
 
 @Composable

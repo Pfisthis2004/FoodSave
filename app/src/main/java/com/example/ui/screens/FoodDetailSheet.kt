@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
@@ -103,11 +105,18 @@ fun FoodDetailSheet(
         containerColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier.testTag("food_detail_sheet")
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 8.dp)
+                .navigationBarsPadding(),
+            contentAlignment = Alignment.TopCenter
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 640.dp)
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
+            ) {
             // Header: Large Emoji & Title
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -277,6 +286,7 @@ fun FoodDetailSheet(
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
+}
 }
 
 @Composable

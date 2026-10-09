@@ -23,6 +23,9 @@ interface FoodDao {
     @Query("SELECT COUNT(*) FROM food_items WHERE isUsed = 0")
     suspend fun countActiveFoods(): Int
 
+    @Query("SELECT COUNT(*) FROM food_items")
+    suspend fun countTotalFoods(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFood(food: FoodItem): Long
 

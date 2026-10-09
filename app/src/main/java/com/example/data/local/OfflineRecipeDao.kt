@@ -12,6 +12,9 @@ interface OfflineRecipeDao {
     @Query("SELECT * FROM offline_recipes ORDER BY id ASC")
     fun getAllOfflineRecipes(): Flow<List<OfflineRecipe>>
 
+    @Query("SELECT * FROM offline_recipes ORDER BY id ASC")
+    suspend fun getOfflineRecipesList(): List<OfflineRecipe>
+
     @Query("SELECT * FROM offline_recipes WHERE name LIKE '%' || :query || '%' OR mainKeywords LIKE '%' || :query || '%' OR ingredientsText LIKE '%' || :query || '%'")
     fun searchOfflineRecipes(query: String): Flow<List<OfflineRecipe>>
 

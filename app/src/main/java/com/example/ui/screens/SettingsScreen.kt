@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
@@ -56,6 +57,7 @@ fun SettingsScreen(
     onDarkModeChanged: (Boolean?) -> Unit,
     onTriggerTestNotification: () -> Unit,
     onReloadSampleData: () -> Unit,
+    onClearSampleData: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -339,6 +341,21 @@ fun SettingsScreen(
                         Icon(imageVector = Icons.Outlined.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("Nạp lại dữ liệu mẫu & Sổ tay công thức", color = MaterialTheme.colorScheme.primary)
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedButton(
+                        onClick = onClearSampleData,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(imageVector = Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Xóa toàn bộ dữ liệu mẫu (Làm sạch kho & Sổ tay)", color = MaterialTheme.colorScheme.error)
                     }
                 }
             }

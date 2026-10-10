@@ -55,17 +55,30 @@ class FoodRepository(
         foodDao.clearAllFoods()
     }
 
-    suspend fun reloadSampleFoods() {
+    suspend fun clearSampleData(context: android.content.Context) {
         foodDao.clearAllFoods()
-        insertInitialSampleFoods()
+        offlineRecipeDao.clearAllOfflineRecipes()
+        val prefs = context.getSharedPreferences("foodsave_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("sample_data_cleared", true).apply()
     }
 
-    suspend fun ensureSampleDataLoaded(context: android.content.Context) {
-        // Preload offline cookbook catalog into Room if empty (100% offline recipes)
+    suspend fun reloadSampleFoods(context: android.content.Context) {
+        val prefs = context.getSharedPreferences("foodsave_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("sample_data_cleared", false).apply()
+        foodDao.clearAllFoods()
+        insertInitialSampleFoods()
         if (offlineRecipeDao.countRecipes() == 0) {
             preloadOfflineCookbook()
         }
-        // Do NOT auto-seed sample foods on app launches. User foods are completely managed by user and persisted in Room.
+    }
+
+    suspend fun ensureSampleDataLoaded(context: android.content.Context) {
+        val prefs = context.getSharedPreferences("foodsave_prefs", android.content.Context.MODE_PRIVATE)
+        val isCleared = prefs.getBoolean("sample_data_cleared", false)
+        // Preload offline cookbook catalog into Room if empty and user has not cleared sample data
+        if (!isCleared && offlineRecipeDao.countRecipes() == 0) {
+            preloadOfflineCookbook()
+        }
     }
 
     private suspend fun insertInitialSampleFoods() {

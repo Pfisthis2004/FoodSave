@@ -263,9 +263,15 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun clearSampleData() {
+        viewModelScope.launch {
+            repository.clearSampleData(getApplication())
+        }
+    }
+
     fun reloadSampleFoods() {
         viewModelScope.launch {
-            repository.reloadSampleFoods()
+            repository.reloadSampleFoods(getApplication())
         }
     }
 }

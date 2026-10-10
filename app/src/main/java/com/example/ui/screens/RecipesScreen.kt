@@ -358,25 +358,16 @@ fun RecipesScreen(
 
                 when (uiState) {
                     is RecipeUiState.Idle -> {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 24.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(text = if (activeFoods.isEmpty()) "🧺" else "🥗", fontSize = 48.sp)
-                                    Spacer(modifier = Modifier.height(10.dp))
+                        if (activeFoods.isNotEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 12.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Text(
-                                        text = if (activeFoods.isEmpty()) "hiện tại không có thực phẩm nào để tôi có thể gợi ý" else "Sẵn sàng gợi ý món ăn!",
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = if (activeFoods.isEmpty()) "Hãy bấm 'Thêm thực phẩm ngay' để bắt đầu quản lý thực phẩm của bạn." else "Bấm 'Gợi ý món ăn từ tủ lạnh' để tìm 3 công thức phù hợp nhất (kèm ảnh món ăn thực tế).",
+                                        text = "🥗 Sẵn sàng gợi ý 3 công thức phù hợp nhất từ tủ lạnh của bạn.",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center

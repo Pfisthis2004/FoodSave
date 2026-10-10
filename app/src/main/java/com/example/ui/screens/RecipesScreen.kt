@@ -336,11 +336,6 @@ fun RecipesScreen(
                             .height(52.dp)
                             .testTag("generate_recipes_button")
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.AutoAwesome,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = when {

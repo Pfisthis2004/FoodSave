@@ -621,7 +621,6 @@ private fun AppScreenContent(
                 onDarkModeChanged = { viewModel.darkModePreference.value = it },
                 onTriggerTestNotification = { viewModel.triggerTestNotification() },
                 onReloadSampleData = { viewModel.reloadSampleFoods() },
-                onClearSampleData = { viewModel.clearSampleData() },
                 modifier = modifier
             )
         }
